@@ -370,9 +370,11 @@ static int fusb302b_set_cc(const struct device *dev, enum tc_cc_pull cc_pull) {
 	return 0;
 }
 
-static void fusb302b_set_vconn_discharge_cb(const struct device *dev, tcpc_vconn_discharge_cb_t cb) {}
+static void fusb302b_set_vconn_discharge_cb(const struct device *dev, tcpc_vconn_discharge_cb_t cb,
+                                            const struct device *usbc_dev) {}
 
-static void fusb302b_set_vconn_cb(const struct device *dev, tcpc_vconn_control_cb_t vconn_cb) {}
+static void fusb302b_set_vconn_cb(const struct device *dev, tcpc_vconn_control_cb_t vconn_cb,
+                                  const struct device *usbc_dev) {}
 
 static int fusb302b_get_cc(const struct device *dev, enum tc_cc_voltage_state *cc1, enum tc_cc_voltage_state *cc2) {
 	const struct fusb302b_cfg *cfg = dev->config;
@@ -596,7 +598,7 @@ int fusb302b_transmit_data(const struct device *dev, struct pd_msg *msg) {
 			res = transmit_hard_reset(cfg);
 			break;
 		default:
-			LOG_ERR("Packet type %s not supported", pd_packet_type_to_str(msg->type));
+			LOG_ERR("Packet type %d not supported", msg->type);
 			res = -1;
 			break;
 	}
@@ -624,7 +626,6 @@ static const struct tcpc_driver_api fusb302b_tcpc_driver_api = {
 		.set_cc_polarity = fusb302b_set_cc_polarity,
 		.transmit_data = fusb302b_transmit_data,
 		.dump_std_reg = NULL,
-		.alert_handler_cb = NULL,
 		.get_status_register = NULL,
 		.clear_status_register = NULL,
 		.mask_status_register = NULL,
